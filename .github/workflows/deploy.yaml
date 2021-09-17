@@ -1,0 +1,23 @@
+name: Deploy model
+on: [release]
+defaults:
+  run:
+    shell: bash
+jobs:
+  Deploy-On-Engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          zip -r model.zip model source
+      - name: Update model
+        uses: GAMS-dev/actions/update-model@v1
+        with:
+          url: ${{ secrets.ENGINE_URL }}
+          namespace: ${{ secrets.ENGINE_NS }}
+          username: ${{ secrets.ENGINE_USER }}
+          password: ${{ secrets.ENGINE_PASSWORD }}
+          model: 'times_${{ github.event.release.tag_name }}'
+          run: 'demo12.run'
+          arguments: 'idir1=source,idir2=model,fileCase=2'
+          data: '${{ github.workspace }}/model.zip'
